@@ -36,10 +36,20 @@ const BaseInput = styled.input`
   font-size: 1.125rem;
   padding: 0 0.5rem;
   color: ${(props) => props.theme['gray-100']};
+
+  &:focus {
+    box-shadow: none;
+    border-color: ${(props) => props.theme['green-500']};
+  }
+
+  &::placeholder {
+    color: ${(props) => props.theme['gray-500']};
+  }
 `;
 
 export const TaskInput = styled(BaseInput)`
   flex: 1; /* ocupa o máximo de espaço que dá, ele é um atalho para o flex-grow(habilidade de crescer além do tamanho original), flex-shrink(habilidade de diminuir além do tamanho original) e flex-basis(tamanho ideal) */
+
 `;
 
 export const MinuteAmountInput = styled(BaseInput)`
@@ -53,12 +63,18 @@ export const CountdownContainer = styled.div`
   color: ${(props) => props.theme['gray-100']};
   display: flex;
   gap: 1rem;
+  
 
   span {
     background: ${(props) => props.theme['gray-700']};
     padding: 2rem 1rem;
     border-radius: 8px;
     gap: 1rem;
+    width: 8.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
   }
 `;
 
