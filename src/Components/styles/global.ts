@@ -1,5 +1,6 @@
 import { createGlobalStyle } from 'styled-components';
 
+
 export const GlobalStyle = createGlobalStyle`
   * {
     margin: 0;
@@ -15,6 +16,7 @@ export const GlobalStyle = createGlobalStyle`
   body {
     background: ${(props) => props.theme['gray-900']};
     color: ${(props) => props.theme['gray-300']};
+    font-family: 'Roboto', sans-serif;
     -webkit-font-smoothing: antialiased;
   }
 
