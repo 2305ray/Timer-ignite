@@ -49,7 +49,9 @@ const BaseInput = styled.input`
 
 export const TaskInput = styled(BaseInput)`
   flex: 1; /* ocupa o máximo de espaço que dá, ele é um atalho para o flex-grow(habilidade de crescer além do tamanho original), flex-shrink(habilidade de diminuir além do tamanho original) e flex-basis(tamanho ideal) */
-
+  &::-webkit-calendar-picker-indicator { 
+    display: none !important;
+  }
 `;
 
 export const MinuteAmountInput = styled(BaseInput)`
