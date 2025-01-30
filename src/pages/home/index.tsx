@@ -8,14 +8,28 @@ import {
   StartCountdownButton,
   TaskInput,
 } from './styles'
+// import { useState } from 'react'
 
 export function Home() {
+  // const [task, setTask] = useState('') // estado para cada um dos input, se n colocasse as aspas n ficaria como string
+  function handleSubmti(event) {
+    event.target.task.value
+    // com isso perde a fluidez do react, de habilitar, desabilitar, pegar letra por letra, mas ganha em perfomance
+  }
+
   return (
     <HomeContainer>
       <form action="">
         <FormContainer>
           <label htmlFor="task">Vou trabalhar em</label>
-          <TaskInput id="task" list='task-suggestions' placeholder="Dê um nome para o seu projeto" />
+          <TaskInput
+            id="task"
+            list="task-suggestions"
+            placeholder="Dê um nome para o seu projeto"
+            // onChange={(e) => setTask(e.target.value)}
+            // // para a cada vez que o usuário digitar algo, o valor do input será atualizado
+            // value={task} // o valor do estado, atualiza visualmente o input
+          />
 
           <datalist id="task-suggestions">
             <option value="Projeto 1" />
@@ -44,6 +58,7 @@ export function Home() {
           <span>0</span>
         </CountdownContainer>
 
+        {/* // quando não tem um task, desabilita o botão */}
         <StartCountdownButton disabled type="submit">
           <Play size={28} />
           Começar
