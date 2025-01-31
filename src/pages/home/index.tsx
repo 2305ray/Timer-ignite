@@ -1,4 +1,6 @@
 import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import * as zod from 'zod'
 import { Play } from 'phosphor-react'
 import {
   CountdownContainer,
@@ -11,11 +13,18 @@ import {
 } from './styles'
 // import { useState } from 'react'
 
+const fnewCycleFormSchema = zod.object({
+  task: zod.string().min(1, 'informe a tarefa'),
+})
+
 // const [task, setTask] = useState('') // estado para cada um dos input, se n colocasse as aspas n ficaria como string
 export function Home() {
-  const { register, handleSubmit, watch } = useForm() // usa a desestruração para pegar o form
-  //register é um método que adiciona um input ao formulario, fal sobre os campos que vai ter
+  // usa a desestruração para pegar o form
+  const { register, handleSubmit, watch } = useForm({
+    //register é um método que adiciona um input ao formulario, fal sobre os campos que vai ter
   //retorna um objeto com várias funções
+    resolver: zodResolver(), // de que forma quer validar? zod é uma biblioteca de validação
+  })
 
   function handleCreateNewCycle(data: any) {
     console.log(data)
