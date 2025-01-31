@@ -1,3 +1,4 @@
+import { useForm } from 'react-hook-form'
 import { Play } from 'phosphor-react'
 import {
   CountdownContainer,
@@ -11,8 +12,13 @@ import {
 // import { useState } from 'react'
 
 export function Home() {
+  const { register, handleSubmt} = useForm() // usa a desestruração para pegar o form
+    //register é um método que adiciona um input ao formulario, faa sobre os campos que vai ter
+    //retorna um objeto com várias funções
   // const [task, setTask] = useState('') // estado para cada um dos input, se n colocasse as aspas n ficaria como string
-  function handleSubmti(event) {
+  function handleSubmt(event) {
+    
+
     event.target.task.value
     // com isso perde a fluidez do react, de habilitar, desabilitar, pegar letra por letra, mas ganha em perfomance
   }
