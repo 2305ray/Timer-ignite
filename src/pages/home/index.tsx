@@ -11,27 +11,32 @@ import {
 } from './styles'
 // import { useState } from 'react'
 
+// const [task, setTask] = useState('') // estado para cada um dos input, se n colocasse as aspas n ficaria como string
 export function Home() {
-  const { register, handleSubmt} = useForm() // usa a desestruração para pegar o form
-    //register é um método que adiciona um input ao formulario, faa sobre os campos que vai ter
-    //retorna um objeto com várias funções
-  // const [task, setTask] = useState('') // estado para cada um dos input, se n colocasse as aspas n ficaria como string
-  function handleSubmt(event) {
-    
+  const { register, handleSubmit, watch } = useForm() // usa a desestruração para pegar o form
+  //register é um método que adiciona um input ao formulario, fal sobre os campos que vai ter
+  //retorna um objeto com várias funções
 
-    event.target.task.value
-    // com isso perde a fluidez do react, de habilitar, desabilitar, pegar letra por letra, mas ganha em perfomance
+  function handleCreateNewCycle(data: any) {
+    console.log(data)
   }
+
+  // task pq foi o nome dadp dentro do register
+  const task = watch('task') // pega o valor do input, e atualiza toda vez que o input é atualizado
+  const isSubmitDisabled = !task
+  // event.target.task.value  pega o valor do input
+  // com isso perde a fluidez do react, de habilitar, desabilitar, pegar letra por letra, mas ganha em perfomance
 
   return (
     <HomeContainer>
-      <form action="">
+      <form action="" onSubmit={handleSubmit(handleCreateNewCycle)}>
         <FormContainer>
           <label htmlFor="task">Vou trabalhar em</label>
           <TaskInput
             id="task"
             list="task-suggestions"
             placeholder="Dê um nome para o seu projeto"
+            {...register('task')}
             // onChange={(e) => setTask(e.target.value)}
             // // para a cada vez que o usuário digitar algo, o valor do input será atualizado
             // value={task} // o valor do estado, atualiza visualmente o input
@@ -51,6 +56,7 @@ export function Home() {
             step={5}
             min={5}
             max={60}
+            {...register('minutesAmount', { valueAsNumber: true })}
           />
 
           <span>Minutos.</span>
@@ -65,7 +71,7 @@ export function Home() {
         </CountdownContainer>
 
         {/* // quando não tem um task, desabilita o botão */}
-        <StartCountdownButton disabled type="submit">
+        <StartCountdownButton disabled={isSubmitDisabled} type="submit">
           <Play size={28} />
           Começar
         </StartCountdownButton>
