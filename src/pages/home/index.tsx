@@ -11,28 +11,79 @@ import {
   StartCountdownButton,
   TaskInput,
 } from './styles'
+import { useState } from 'react'
 // import { useState } from 'react'
 
-const newCycleFormSchema = zod.object({
+const newCycleFormValidationSchema = zod.object({
   task: zod.string().min(1, 'informe a tarefa'),
-  minutesAmount: zod.number().min(5, 'informe um valor entre 5 e 60').max(60),
+  minutesAmount: zod
+    .number()
+    .min(5, 'Precisa ser no mínimo 5 minutos.')
+    .max(60, 'Precisa ser no máximo 60 minutos.'),
 })
 
+type NewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>
 // const [task, setTask] = useState('') // estado para cada um dos input, se n colocasse as aspas n ficaria como string
+
+interface Cycle {
+  id: string // representar unicamente um ciclo
+  task: string
+  minutesAmount: number
+}
+
 export function Home() {
+  // estado para cada um dos input, ele inicia com uma lista vazia
+  // estado para cada um dos input, se n colocasse as aspas n ficaria como string
+  const [cycles, setCycles] = useState<Cycle[]>([])
+  const [activeCycleId, setActiveCycleId] = useState<string | null>(null)
+
+  //amarzena o segundos que se passarm desde q o ciclo foi iniciado
+  const [amountSecondsPassed, setAmountSecondsPassed] = useState(0)
+
   // usa a desestruração para pegar o form
-  const { register, handleSubmit, watch, formState } = useForm({
+  const { register, handleSubmit, watch, reset } = useForm<NewCycleFormData>({
     //register é um método que adiciona um input ao formulario, fal sobre os campos que vai ter
     //retorna um objeto com várias funções
-    resolver: zodResolver(newCycleFormSchema),
+    resolver: zodResolver(newCycleFormValidationSchema),
     // de que forma quer validar? zod é uma biblioteca de validação
+    defaultValues: {
+      task: '',
+      minutesAmount: 0,
+    },
   })
 
-  function handleCreateNewCycle(data: any) {
-    console.log(data)
-  }
+  function handleCreateNewCycle(data: NewCycleFormData) {
+    const id = String(new Date().getTime()) // pega a data atual e transforma em milisegundos)
+    const newCycle: Cycle = {
+      id,
+      task: data.task,
+      minutesAmount: data.minutesAmount,
+    }
 
+    setCycles((state) => [...state, newCycle]) // ele pega o estate atual e adiciona um novo ciclo
+    setActiveCycleId(id)
+    //ewCycle) // ciclo ativo é o novo
+
+    reset()
+  }
+  // com base no id do ciclo ativo, percorrer todos ciclos e retornar o ciclo q tenha o mesmo id
   // task pq foi o nome dadp dentro do register
+  const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
+
+  //converter o numero de minutos em segundos
+  // se o ciclo ativo existir, pega o valor de minutosAmount, se não existir, retorna
+  const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0
+  const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0
+
+  const minutesAmount = Math.floor(currentSeconds / 60) //arrendonda para baixo
+  const secondsAmount = currentSeconds % 60 // resto da divisão, o % é o operador de resto
+
+  //transformar o numero em string, a variavel vai ter que ter 2 caracteres, se n tiver vai colocar no começo
+  const minutes = String(minutesAmount).padStart(2, '0')
+  // padStart, se o numero tiver menos do que o esperado ele vai preencher com algum caractere
+
+  const seconds = String(secondsAmount).padStart(2, '0')
+
   const task = watch('task') // pega o valor do input, e atualiza toda vez que o input é atualizado
   const isSubmitDisabled = !task
   // event.target.task.value  pega o valor do input
@@ -74,11 +125,12 @@ export function Home() {
         </FormContainer>
 
         <CountdownContainer>
-          <span>0</span>
-          <span>0</span>
+          <span>{minutes[0]}</span>
+          {/* é colocado como se fosse o númeor do array */}
+          <span>{minutes[1]}</span>
           <Separator>:</Separator>
-          <span>0</span>
-          <span>0</span>
+          <span>{seconds[0]}</span>
+          <span>{seconds[1]}</span>
         </CountdownContainer>
 
         {/* // quando não tem um task, desabilita o botão */}
