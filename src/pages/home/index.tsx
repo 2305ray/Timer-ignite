@@ -13,7 +13,7 @@ import {
 } from './styles'
 // import { useState } from 'react'
 
-const fnewCycleFormSchema = zod.object({
+const newCycleFormSchema = zod.object({
   task: zod.string().min(1, 'informe a tarefa'),
 })
 
