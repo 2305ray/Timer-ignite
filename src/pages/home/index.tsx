@@ -15,15 +15,17 @@ import {
 
 const newCycleFormSchema = zod.object({
   task: zod.string().min(1, 'informe a tarefa'),
+  minutesAmount: zod.number().min(5, 'informe um valor entre 5 e 60').max(60),
 })
 
 // const [task, setTask] = useState('') // estado para cada um dos input, se n colocasse as aspas n ficaria como string
 export function Home() {
   // usa a desestruração para pegar o form
-  const { register, handleSubmit, watch } = useForm({
+  const { register, handleSubmit, watch, formState } = useForm({
     //register é um método que adiciona um input ao formulario, fal sobre os campos que vai ter
-  //retorna um objeto com várias funções
-    resolver: zodResolver(), // de que forma quer validar? zod é uma biblioteca de validação
+    //retorna um objeto com várias funções
+    resolver: zodResolver(newCycleFormSchema),
+    // de que forma quer validar? zod é uma biblioteca de validação
   })
 
   function handleCreateNewCycle(data: any) {
