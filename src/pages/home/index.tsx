@@ -14,23 +14,26 @@ import {
 } from './styles'
 import { useEffect, useState } from 'react'
 import { differenceInSeconds } from 'date-fns'
+import { NewCycleForm } from './Components/NewCycleForm'
+import { Countdown } from './Components/Countdown'
 
 const newCycleFormValidationSchema = zod.object({
-  task: zod.string().min(1, 'informe a tarefa'),
+  task: zod.string().min(1, 'Informe a tarefa'),
   minutesAmount: zod
     .number()
-    .min(5, 'Precisa ser no mínimo 5 minutos.')
+    .min(1, 'Precisa ser no mínimo 5 minutos.')
     .max(60, 'Precisa ser no máximo 60 minutos.'),
 })
 
 type NewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>
-// const [task, setTask] = useState('') // estado para cada um dos input, se n colocasse as aspas n ficaria como string
 
 interface Cycle {
   id: string // representar unicamente um ciclo
   task: string
   minutesAmount: number
   startDate: Date // salvar qual q foi a data q o timer começou/ficou ativo
+  interruptedDate?: Date
+  finishedDate?: Date
 }
 
 export function Home() {
@@ -65,14 +68,30 @@ export function Home() {
 
     setCycles((state) => [...state, newCycle]) // ele pega o estate atual e adiciona um novo ciclo
     setActiveCycleId(id)
-    //ewCycle) // ciclo ativo é o novo
     setAmountSecondsPassed(0) // zera os segundos passados
 
     reset()
   }
+
+  function handleInterruptCycle() {
+    setCycles((state) =>
+      state.map((cycle) => {
+        if (cycle.id === activeCycleId) {
+          return { ...cycle, interruptedDate: new Date() }
+        } else {
+          return cycle
+        }
+      }),
+    )
+    setActiveCycleId(null)
+  }
+
   // com base no id do ciclo ativo, percorrer todos ciclos e retornar o ciclo q tenha o mesmo id
-  // task pq foi o nome dadp dentro do register
   const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
+
+  //converter o numero de minutos em segundos
+  // se o ciclo ativo existir, pega o valor de minutosAmount, se não existir, retorna
+  const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0
 
   useEffect(() => {
     let interval: number // para armazenar o intervalo
@@ -81,9 +100,26 @@ export function Home() {
       interval = setInterval(() => {
         // a cada segundo, atualiza o estado
         // difrença em segundos da data atual  (sempre adiante como primeiro parametro) e a data de inicio do ciclo ativo
-        setAmountSecondsPassed(
-          differenceInSeconds(new Date(), activeCycle.startDate),
+        const secondDifference = differenceInSeconds(
+          new Date(),
+          activeCycle.startDate,
         )
+
+        if (secondDifference >= totalSeconds) {
+          setCycles((state) =>
+            state.map((cycle) => {
+              if (cycle.id === activeCycle.id) {
+                return { ...cycle, finishedDate: new Date() }
+              } else {
+                return cycle
+              }
+            }),
+          )
+          setAmountSecondsPassed(totalSeconds) // para ficar zerado
+          clearInterval(interval)
+        } else {
+          setAmountSecondsPassed(secondDifference)
+        }
       }, 1000)
     }
 
@@ -91,11 +127,8 @@ export function Home() {
       // serev para quando executar dnv e quer fazer algo para limpar o anterior para q n aconteça mais
       clearInterval(interval)
     }
-  }, [activeCycle]) // sempre q utiliza uma variavel de fora do useEffect, tem que colocar ela como dependencia
+  }, [activeCycle, totalSeconds, activeCycleId]) // sempre q utiliza uma variavel de fora do useEffect, tem que colocar ela como dependencia
 
-  //converter o numero de minutos em segundos
-  // se o ciclo ativo existir, pega o valor de minutosAmount, se não existir, retorna
-  const totalSeconds = activeCycle ? activeCycle.minutesAmount * 60 : 0
   const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0
 
   const minutesAmount = Math.floor(currentSeconds / 60) //arrendonda para baixo
@@ -121,53 +154,13 @@ export function Home() {
   return (
     <HomeContainer>
       <form action="" onSubmit={handleSubmit(handleCreateNewCycle)}>
-        <FormContainer>
-          <label htmlFor="task">Vou trabalhar em</label>
-          <TaskInput
-            id="task"
-            list="task-suggestions"
-            placeholder="Dê um nome para o seu projeto"
-            disabled= {!!activeCycle} // converte para booleano
-            {...register('task')}
-            // onChange={(e) => setTask(e.target.value)}
-            // // para a cada vez que o usuário digitar algo, o valor do input será atualizado
-            // value={task} // o valor do estado, atualiza visualmente o input
-          />
-
-          <datalist id="task-suggestions">
-            <option value="Projeto 1" />
-            <option value="Projeto 2" />
-            <option value="Projeto 3" />
-          </datalist>
-
-          <label htmlFor="minutesAmount">Durante</label>
-          <MinuteAmountInput
-            type="number"
-            id="minutesAmount"
-            placeholder="00"
-            step={5}
-            min={5}
-            max={60}
-            disabled= {!!activeCycle} // converte para booleano
-            {...register('minutesAmount', { valueAsNumber: true })}
-          />
-
-          <span>Minutos.</span>
-        </FormContainer>
-
-        <CountdownContainer>
-          <span>{minutes[0]}</span>
-          {/* é colocado como se fosse o númeor do array */}
-          <span>{minutes[1]}</span>
-          <Separator>:</Separator>
-          <span>{seconds[0]}</span>
-          <span>{seconds[1]}</span>
-        </CountdownContainer>
+        <NewCycleForm />
+        <Countdown />
 
         {/* // quando não tem um task, desabilita o botão */}
 
         {activeCycle ? (
-          <StopCountdownButton disabled={isSubmitDisabled} type="button">
+          <StopCountdownButton onClick={handleInterruptCycle} type="button">
             <HandPalm size={28} />
             Interromper
           </StopCountdownButton>
