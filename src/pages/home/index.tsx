@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as zod from 'zod'
-import { Play } from 'phosphor-react'
+import { HandPalm, Play } from 'phosphor-react'
 import {
   CountdownContainer,
   FormContainer,
@@ -9,10 +9,11 @@ import {
   MinuteAmountInput,
   Separator,
   StartCountdownButton,
+  StopCountdownButton,
   TaskInput,
 } from './styles'
-import { useState } from 'react'
-// import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { differenceInSeconds } from 'date-fns'
 
 const newCycleFormValidationSchema = zod.object({
   task: zod.string().min(1, 'informe a tarefa'),
@@ -29,6 +30,7 @@ interface Cycle {
   id: string // representar unicamente um ciclo
   task: string
   minutesAmount: number
+  startDate: Date // salvar qual q foi a data q o timer começou/ficou ativo
 }
 
 export function Home() {
@@ -58,17 +60,38 @@ export function Home() {
       id,
       task: data.task,
       minutesAmount: data.minutesAmount,
+      startDate: new Date(), // data atual base da data pra saber quanto tempo passou
     }
 
     setCycles((state) => [...state, newCycle]) // ele pega o estate atual e adiciona um novo ciclo
     setActiveCycleId(id)
     //ewCycle) // ciclo ativo é o novo
+    setAmountSecondsPassed(0) // zera os segundos passados
 
     reset()
   }
   // com base no id do ciclo ativo, percorrer todos ciclos e retornar o ciclo q tenha o mesmo id
   // task pq foi o nome dadp dentro do register
   const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
+
+  useEffect(() => {
+    let interval: number // para armazenar o intervalo
+
+    if (activeCycle) {
+      interval = setInterval(() => {
+        // a cada segundo, atualiza o estado
+        // difrença em segundos da data atual  (sempre adiante como primeiro parametro) e a data de inicio do ciclo ativo
+        setAmountSecondsPassed(
+          differenceInSeconds(new Date(), activeCycle.startDate),
+        )
+      }, 1000)
+    }
+
+    return () => {
+      // serev para quando executar dnv e quer fazer algo para limpar o anterior para q n aconteça mais
+      clearInterval(interval)
+    }
+  }, [activeCycle]) // sempre q utiliza uma variavel de fora do useEffect, tem que colocar ela como dependencia
 
   //converter o numero de minutos em segundos
   // se o ciclo ativo existir, pega o valor de minutosAmount, se não existir, retorna
@@ -84,6 +107,12 @@ export function Home() {
 
   const seconds = String(secondsAmount).padStart(2, '0')
 
+  useEffect(() => {
+    if (activeCycle) {
+      document.title = `${minutes}:${seconds}`
+    }
+  }, [minutes, seconds, activeCycle]) // sempre que o minutes e o seconds mudar, ele vai aparecer no titulo
+
   const task = watch('task') // pega o valor do input, e atualiza toda vez que o input é atualizado
   const isSubmitDisabled = !task
   // event.target.task.value  pega o valor do input
@@ -98,6 +127,7 @@ export function Home() {
             id="task"
             list="task-suggestions"
             placeholder="Dê um nome para o seu projeto"
+            disabled= {!!activeCycle} // converte para booleano
             {...register('task')}
             // onChange={(e) => setTask(e.target.value)}
             // // para a cada vez que o usuário digitar algo, o valor do input será atualizado
@@ -118,6 +148,7 @@ export function Home() {
             step={5}
             min={5}
             max={60}
+            disabled= {!!activeCycle} // converte para booleano
             {...register('minutesAmount', { valueAsNumber: true })}
           />
 
@@ -134,10 +165,18 @@ export function Home() {
         </CountdownContainer>
 
         {/* // quando não tem um task, desabilita o botão */}
-        <StartCountdownButton disabled={isSubmitDisabled} type="submit">
-          <Play size={28} />
-          Começar
-        </StartCountdownButton>
+
+        {activeCycle ? (
+          <StopCountdownButton disabled={isSubmitDisabled} type="button">
+            <HandPalm size={28} />
+            Interromper
+          </StopCountdownButton>
+        ) : (
+          <StartCountdownButton disabled={isSubmitDisabled} type="submit">
+            <Play size={28} />
+            Começar
+          </StartCountdownButton>
+        )}
       </form>
     </HomeContainer>
   )
