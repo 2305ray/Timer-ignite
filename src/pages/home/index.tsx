@@ -4,19 +4,20 @@ import {
   StartCountdownButton,
   StopCountdownButton,
 } from './styles'
-import { useEffect, useState } from 'react'
-import { differenceInSeconds } from 'date-fns'
+import { createContext, useState } from 'react'
+
 import { NewCycleForm } from './Components/NewCycleForm'
 import { Countdown } from './Components/Countdown'
 
-interface Cycle {
-  id: string // representar unicamente um ciclo
-  task: string
-  minutesAmount: number
-  startDate: Date // salvar qual q foi a data q o timer começou/ficou ativo
-  interruptedDate?: Date
-  finishedDate?: Date
-}
+const newCycleFormValidationSchema = zod.object({
+  task: zod.string().min(1, 'Informe a tarefa'),
+  minutesAmount: zod
+    .number()
+    .min(1, 'Precisa ser no mínimo 5 minutos.')
+    .max(60, 'Precisa ser no máximo 60 minutos.'),
+})
+
+type NewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>
 
 export function Home() {
   // estado para cada um dos input, ele inicia com uma lista vazia
@@ -26,6 +27,18 @@ export function Home() {
 
   // com base no id do ciclo ativo, percorrer todos ciclos e retornar o ciclo q tenha o mesmo id
   const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
+
+  function markCurrentCycleFinished() {
+    setCycles((state) =>
+      state.map((cycle) => {
+        if (cycle.id === activeCycle.id) {
+          return { ...cycle, finishedDate: new Date() }
+        } else {
+          return cycle
+        }
+      }),
+    )
+  }
 
   function handleCreateNewCycle(data: NewCycleFormData) {
     const id = String(new Date().getTime()) // pega a data atual e transforma em milisegundos)
@@ -55,23 +68,6 @@ export function Home() {
     setActiveCycleId(null)
   }
 
-  const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0
-
-  const minutesAmount = Math.floor(currentSeconds / 60) //arrendonda para baixo
-  const secondsAmount = currentSeconds % 60 // resto da divisão, o % é o operador de resto
-
-  //transformar o numero em string, a variavel vai ter que ter 2 caracteres, se n tiver vai colocar no começo
-  const minutes = String(minutesAmount).padStart(2, '0')
-  // padStart, se o numero tiver menos do que o esperado ele vai preencher com algum caractere
-
-  const seconds = String(secondsAmount).padStart(2, '0')
-
-  useEffect(() => {
-    if (activeCycle) {
-      document.title = `${minutes}:${seconds}`
-    }
-  }, [minutes, seconds, activeCycle]) // sempre que o minutes e o seconds mudar, ele vai aparecer no titulo
-
   const task = watch('task') // pega o valor do input, e atualiza toda vez que o input é atualizado
   const isSubmitDisabled = !task
   // event.target.task.value  pega o valor do input
@@ -80,12 +76,9 @@ export function Home() {
   return (
     <HomeContainer>
       <form action="" onSubmit={handleSubmit(handleCreateNewCycle)}>
+      
         <NewCycleForm />
-        <Countdown
-          activeCycle={activeCycle}
-          setCycles={setCycles}
-          activeCycleId={activeCycleId}
-        />
+        <Countdown />
 
         {/* // quando não tem um task, desabilita o botão */}
 

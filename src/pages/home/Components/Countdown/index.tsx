@@ -1,18 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { CountdownContainer, Separator } from './style'
 import { differenceInSeconds } from 'date-fns'
+import { CyclesContext } from '../..'
 
-interface CountdownProps {
-  activeCycle: any
-  setCycles: any
-  activeCycleId: string | null
-}
-
-export function Countdown({
-  activeCycle,
-  setCycles,
-  activeCycleId,
-}: CountdownProps) {
+export function Countdown() {
+  const { activeCycle, activeCycleId, markCurrentCycleFinished } =
+    useContext(CyclesContext)
   //amarzena o segundos que se passarm desde q o ciclo foi iniciado
   const [amountSecondsPassed, setAmountSecondsPassed] = useState(0)
 
@@ -33,15 +26,8 @@ export function Countdown({
         )
 
         if (secondDifference >= totalSeconds) {
-          setCycles((state) =>
-            state.map((cycle) => {
-              if (cycle.id === activeCycle.id) {
-                return { ...cycle, finishedDate: new Date() }
-              } else {
-                return cycle
-              }
-            }),
-          )
+          markCurrentCycleFinished()
+
           setAmountSecondsPassed(totalSeconds) // para ficar zerado
           clearInterval(interval)
         } else {
@@ -53,7 +39,24 @@ export function Countdown({
       // serev para quando executar dnv e quer fazer algo para limpar o anterior para q n aconteça mais
       clearInterval(interval)
     }
-  }, [activeCycle, totalSeconds, activeCycleId]) // sempre q utiliza uma variavel de fora do useEffect, tem que colocar ela como dependencia
+  }, [activeCycle, totalSeconds, activeCycleId, markCurrentCycleFinished]) // sempre q utiliza uma variavel de fora do useEffect, tem que colocar ela como dependencia
+
+  const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0
+
+  const minutesAmount = Math.floor(currentSeconds / 60) //arrendonda para baixo
+  const secondsAmount = currentSeconds % 60 // resto da divisão, o % é o operador de resto
+
+  //transformar o numero em string, a variavel vai ter que ter 2 caracteres, se n tiver vai colocar no começo
+  const minutes = String(minutesAmount).padStart(2, '0')
+  // padStart, se o numero tiver menos do que o esperado ele vai preencher com algum caractere
+
+  const seconds = String(secondsAmount).padStart(2, '0')
+
+  useEffect(() => {
+    if (activeCycle) {
+      document.title = `${minutes}:${seconds}`
+    }
+  }, [minutes, seconds, activeCycle]) // sempre que o minutes e o seconds mudar, ele vai aparecer no titulo
 
   return (
     <CountdownContainer>

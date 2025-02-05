@@ -6,6 +6,8 @@ import { Router } from './Components/router';
 import { BrowserRouter } from 'react-router-dom';
 
 export function App() {
+
+  
   return (
   <ThemeProvider theme={defaultTheme}> {/*são providers de contexto */}
      <BrowserRouter>  {/*são providers de contexto */}
