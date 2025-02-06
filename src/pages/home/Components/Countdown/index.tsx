@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react'
+import { useContext, useEffec } from 'react'
 import { CountdownContainer, Separator } from './style'
 import { differenceInSeconds } from 'date-fns'
 import { CyclesContext } from '../..'
@@ -6,8 +6,7 @@ import { CyclesContext } from '../..'
 export function Countdown() {
   const { activeCycle, activeCycleId, markCurrentCycleFinished } =
     useContext(CyclesContext)
-  //amarzena o segundos que se passarm desde q o ciclo foi iniciado
-  const [amountSecondsPassed, setAmountSecondsPassed] = useState(0)
+ 
 
   //converter o numero de minutos em segundos
   // se o ciclo ativo existir, pega o valor de minutosAmount, se não existir, retorna

@@ -4,8 +4,6 @@ import {
   StartCountdownButton,
   StopCountdownButton,
 } from './styles'
-import { createContext, useState } from 'react'
-
 import { NewCycleForm } from './Components/NewCycleForm'
 import { Countdown } from './Components/Countdown'
 
@@ -20,53 +18,11 @@ const newCycleFormValidationSchema = zod.object({
 type NewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>
 
 export function Home() {
-  // estado para cada um dos input, ele inicia com uma lista vazia
-  // estado para cada um dos input, se n colocasse as aspas n ficaria como string
-  const [cycles, setCycles] = useState<Cycle[]>([])
-  const [activeCycleId, setActiveCycleId] = useState<string | null>(null)
+  
+  
 
-  // com base no id do ciclo ativo, percorrer todos ciclos e retornar o ciclo q tenha o mesmo id
-  const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
-
-  function markCurrentCycleFinished() {
-    setCycles((state) =>
-      state.map((cycle) => {
-        if (cycle.id === activeCycle.id) {
-          return { ...cycle, finishedDate: new Date() }
-        } else {
-          return cycle
-        }
-      }),
-    )
-  }
-
-  function handleCreateNewCycle(data: NewCycleFormData) {
-    const id = String(new Date().getTime()) // pega a data atual e transforma em milisegundos)
-    const newCycle: Cycle = {
-      id,
-      task: data.task,
-      minutesAmount: data.minutesAmount,
-      startDate: new Date(), // data atual base da data pra saber quanto tempo passou
-    }
-    setCycles((state) => [...state, newCycle]) // ele pega o estate atual e adiciona um novo ciclo
-    setActiveCycleId(id)
-    setAmountSecondsPassed(0) // zera os segundos passados
-
-    reset()
-  }
-
-  function handleInterruptCycle() {
-    setCycles((state) =>
-      state.map((cycle) => {
-        if (cycle.id === activeCycleId) {
-          return { ...cycle, interruptedDate: new Date() }
-        } else {
-          return cycle
-        }
-      }),
-    )
-    setActiveCycleId(null)
-  }
+  
+  
 
   const task = watch('task') // pega o valor do input, e atualiza toda vez que o input é atualizado
   const isSubmitDisabled = !task
