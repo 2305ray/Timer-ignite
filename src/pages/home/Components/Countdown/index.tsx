@@ -1,12 +1,16 @@
-import { useContext, useEffec } from 'react'
+import { useContext, useEffect } from 'react'
 import { CountdownContainer, Separator } from './style'
 import { differenceInSeconds } from 'date-fns'
-import { CyclesContext } from '../..'
+import { CyclesContext } from '../../../../Context/CyclesContext'
 
 export function Countdown() {
-  const { activeCycle, activeCycleId, markCurrentCycleFinished } =
-    useContext(CyclesContext)
- 
+  const {
+    activeCycleId,
+    activeCycle,
+    amountSecondsPassed,
+    markCurrentCycleFinished,
+    setSecondsPassed,
+  } = useContext(CyclesContext)
 
   //converter o numero de minutos em segundos
   // se o ciclo ativo existir, pega o valor de minutosAmount, se não existir, retorna
@@ -27,10 +31,10 @@ export function Countdown() {
         if (secondDifference >= totalSeconds) {
           markCurrentCycleFinished()
 
-          setAmountSecondsPassed(totalSeconds) // para ficar zerado
+          setSecondsPassed(totalSeconds) // para ficar zerado
           clearInterval(interval)
         } else {
-          setAmountSecondsPassed(secondDifference)
+          setSecondsPassed(secondDifference)
         }
       }, 1000)
     }
@@ -38,7 +42,7 @@ export function Countdown() {
       // serev para quando executar dnv e quer fazer algo para limpar o anterior para q n aconteça mais
       clearInterval(interval)
     }
-  }, [activeCycle, totalSeconds, activeCycleId, markCurrentCycleFinished]) // sempre q utiliza uma variavel de fora do useEffect, tem que colocar ela como dependencia
+  }, [activeCycle, totalSeconds, activeCycleId, markCurrentCycleFinished, setSecondsPassed]) // sempre q utiliza uma variavel de fora do useEffect, tem que colocar ela como dependencia
 
   const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0
 

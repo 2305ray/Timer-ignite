@@ -4,6 +4,7 @@ import { defaultTheme } from './Components/styles/themes/default';
 import { Router } from './Components/router';
 
 import { BrowserRouter } from 'react-router-dom';
+import { CyclesContextProvider } from './Context/CyclesContext';
 
 export function App() {
 
@@ -11,7 +12,9 @@ export function App() {
   return (
   <ThemeProvider theme={defaultTheme}> {/*são providers de contexto */}
      <BrowserRouter>  {/*são providers de contexto */}
-      <Router />
+     <CyclesContextProvider>
+        <Router />
+      </CyclesContextProvider>
       <GlobalStyle />
     </BrowserRouter>
   </ThemeProvider>

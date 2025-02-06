@@ -1,29 +1,12 @@
 import { FormContainer, MinuteAmountInput, TaskInput } from './style'
-import * as zod from 'zod'
+import { UseFormRegister } from 'react-hook-form'
+import { NewCycleFormData } from '../../index'
 
-// const newCycleFormValidationSchema = zod.object({
-//   task: zod.string().min(1, 'Informe a tarefa'),
-//   minutesAmount: zod
-//     .number()
-//     .min(1, 'Precisa ser no mínimo 5 minutos.')
-//     .max(60, 'Precisa ser no máximo 60 minutos.'),
-// })
+interface NewCycleFormProps {
+  register: UseFormRegister<NewCycleFormData>
+}
 
-// type NewCycleFormData = zod.infer<typeof newCycleFormValidationSchema>
-
-export function NewCycleForm() {
-  //usa a desestruração para pegar o form
-  const { register, handleSubmit, watch, reset } = useForm<NewCycleFormData>({
-    //register é um método que adiciona um input ao formulario, fal sobre os campos que vai ter
-    //retorna um objeto com várias funções
-    resolver: zodResolver(newCycleFormValidationSchema),
-    // de que forma quer validar? zod é uma biblioteca de validação
-    defaultValues: {
-      task: '',
-      minutesAmount: 0,
-    },
-  })
-
+export function NewCycleForm({ register }: NewCycleFormProps) {
   return (
     <FormContainer>
       <label htmlFor="task">Vou trabalhar em</label>
@@ -31,7 +14,6 @@ export function NewCycleForm() {
         id="task"
         list="task-suggestions"
         placeholder="Dê um nome para o seu projeto"
-        disabled={!!activeCycle} // converte para booleano
         {...register('task')}
       />
 
@@ -47,9 +29,8 @@ export function NewCycleForm() {
         id="minutesAmount"
         placeholder="00"
         step={5}
-        min={1}
+        min={5}
         max={60}
-        disabled={!!activeCycle} // converte para booleano
         {...register('minutesAmount', { valueAsNumber: true })}
       />
 
