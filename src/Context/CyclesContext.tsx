@@ -32,15 +32,24 @@ interface CyclesContextProviderProps {
   children: ReactNode
 }
 
+interface CyclesSate {
+  cycles: Cycle[]
+  activeCycleId: string | Null
+}
+
 export function CyclesContextProvider({
   children,
 }: CyclesContextProviderProps) {
   // estado para cada um dos input, ele inicia com uma lista vazia
   //o reducer é o ponto que vai receber qualquer tipo de alteração no estado
   //o type é oque destigue cada ação
-  const [cycles, dispatch] = useReducer((state: Cycle[], action:any) => { //metodo para disparar a ação
+  const [cycles, dispatch] = useReducer((state: Cycle[], action: any) => {
+    //metodo para disparar a ação
     if (action.type === 'ADD_NEW_CYCLE') {
-      return [...state, action.payload.newCycle]
+      return {
+        ...state, // copiar os dados que ja tem e não mudar o valor do activeCycleId
+        cycles: [...state.cycles, action.payload.newCycle], // atualiza
+      }
     }
 
     return state
@@ -63,16 +72,15 @@ export function CyclesContextProvider({
     dispatch({
       type: 'ADD_NEW_CYCLE',
       payload: {
-         newCycle,
+        newCycle,
       },
     })
-   // setCycles((state) => [...state, newCycle])  ele pega o estate atual e adiciona um novo ciclo
+    // setCycles((state) => [...state, newCycle])  ele pega o estate atual e adiciona um novo ciclo
     setActiveCycleId(id)
     setAmountSecondsPassed(0) // zera os segundos passados
   }
 
   function interruptCurrentCycle() {
-
     dispatch({
       type: 'INTERRUPT_CURRENT_CYCLE',
       payload: {
