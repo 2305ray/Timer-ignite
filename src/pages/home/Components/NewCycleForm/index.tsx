@@ -4,9 +4,10 @@ import { NewCycleFormData } from '../../index'
 
 interface NewCycleFormProps {
   register: UseFormRegister<NewCycleFormData>
+  disabled: boolean
 }
 
-export function NewCycleForm({ register }: NewCycleFormProps) {
+export function NewCycleForm({ register, disabled }: NewCycleFormProps) {
   return (
     <FormContainer>
       <label htmlFor="task">Vou trabalhar em</label>
@@ -14,6 +15,7 @@ export function NewCycleForm({ register }: NewCycleFormProps) {
         id="task"
         list="task-suggestions"
         placeholder="Dê um nome para o seu projeto"
+        disabled={disabled} // Alteração feita aqui
         {...register('task')}
       />
 
@@ -31,6 +33,7 @@ export function NewCycleForm({ register }: NewCycleFormProps) {
         step={5}
         min={5}
         max={60}
+        disabled={disabled} // Alteração feita aqui
         {...register('minutesAmount', { valueAsNumber: true })}
       />
 

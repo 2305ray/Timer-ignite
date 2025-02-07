@@ -32,7 +32,7 @@ export function Home() {
   })
 
   const handleCreateNewCycle: SubmitHandler<NewCycleFormData> = (data) => {
-    createNewCycle(data)
+    createNewCycle(data) // é chamada apartir de um evento
     reset()
   }
 
@@ -42,7 +42,7 @@ export function Home() {
   return (
     <HomeContainer>
       <form onSubmit={handleSubmit(handleCreateNewCycle)}>
-        <NewCycleForm register={register} />
+        <NewCycleForm register={register} disabled={!!activeCycle} /> {/* Alteração feita aqui */}
         <Countdown />
 
         {/* // quando não tem um task, desabilita o botão */}

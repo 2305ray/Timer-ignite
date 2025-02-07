@@ -1,4 +1,4 @@
-import { createContext, useState, ReactNode } from 'react'
+import { createContext, useState, ReactNode, useReducer } from 'react'
 
 interface Cycle {
   id: string // representar unicamente um ciclo
@@ -15,6 +15,7 @@ interface CreateCycleData {
 }
 
 interface CyclesContextType {
+  cycles: Cycle[]
   activeCycle: Cycle | undefined
   activeCycleId: string | null
   amountSecondsPassed: number
@@ -31,54 +32,83 @@ interface CyclesContextProviderProps {
   children: ReactNode
 }
 
-export function CyclesContextProvider({ children }: CyclesContextProviderProps) {
+export function CyclesContextProvider({
+  children,
+}: CyclesContextProviderProps) {
   // estado para cada um dos input, ele inicia com uma lista vazia
-  // estado para cada um dos input, se n colocasse as aspas n ficaria como string
-  const [cycles, setCycles] = useState<Cycle[]>([])
+  //o reducer é o ponto que vai receber qualquer tipo de alteração no estado
+  //o type é oque destigue cada ação
+  const [cycles, dispatch] = useReducer((state: Cycle[], action:any) => { //metodo para disparar a ação
+    if (action.type === 'ADD_NEW_CYCLE') {
+      return [...state, action.payload.newCycle]
+    }
+
+    return state
+  }, [])
   const [activeCycleId, setActiveCycleId] = useState<string | null>(null)
-  //amarzena o segundos que se passarm desde q o ciclo foi iniciado
+  // amarzena o segundos que se passarm desde q o ciclo foi iniciado
   const [amountSecondsPassed, setAmountSecondsPassed] = useState(0)
 
   // com base no id do ciclo ativo, percorrer todos ciclos e retornar o ciclo q tenha o mesmo id
   const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
 
   function createNewCycle(data: CreateCycleData) {
-    const id = String(new Date().getTime()) // pega a data atual e transforma em milisegundos)
+    const id = String(new Date().getTime()) // pega a data atual e transforma em milisegundos
     const newCycle: Cycle = {
       id,
       task: data.task,
       minutesAmount: data.minutesAmount,
       startDate: new Date(), // data atual base da data pra saber quanto tempo passou
     }
-
-    setCycles((state) => [...state, newCycle]) // ele pega o estate atual e adiciona um novo ciclo
+    dispatch({
+      type: 'ADD_NEW_CYCLE',
+      payload: {
+         newCycle,
+      },
+    })
+   // setCycles((state) => [...state, newCycle])  ele pega o estate atual e adiciona um novo ciclo
     setActiveCycleId(id)
     setAmountSecondsPassed(0) // zera os segundos passados
   }
 
   function interruptCurrentCycle() {
-    setCycles((state) =>
-      state.map((cycle) => {
-        if (cycle.id === activeCycleId) {
-          return { ...cycle, interruptedDate: new Date() }
-        } else {
-          return cycle
-        }
-      }),
-    )
+
+    dispatch({
+      type: 'INTERRUPT_CURRENT_CYCLE',
+      payload: {
+        activeCycleId,
+      },
+    })
+    // setCycles((state) =>
+    //   state.map((cycle) => {
+    //     if (cycle.id === activeCycleId) {
+    //       return { ...cycle, interruptedDate: new Date() }
+    //     } else {
+    //       return cycle
+    //     }
+    //   }),
+    // )
     setActiveCycleId(null)
   }
 
   function markCurrentCycleFinished() {
-    setCycles((state) =>
-      state.map((cycle) => {
-        if (cycle.id === activeCycle?.id) {
-          return { ...cycle, finishedDate: new Date() }
-        } else {
-          return cycle
-        }
-      }),
-    )
+    dispatch({
+      type: 'INTERRUPT_CURRENT_CYCLE_AS_FINISHED',
+      payload: {
+        activeCycleId,
+      },
+    })
+
+    // setCycles((state) =>
+    //   state.map((cycle) => {
+    //     if (cycle.id === activeCycle?.id) {
+    //       return { ...cycle, finishedDate: new Date() }
+    //     } else {
+    //       return cycle
+    //     }
+    //   }),
+    // )
+    setActiveCycleId(null) // Adicionado para garantir que o ciclo ativo seja desmarcado quando concluído
   }
 
   function setSecondsPassed(seconds: number) {
@@ -89,6 +119,7 @@ export function CyclesContextProvider({ children }: CyclesContextProviderProps) 
   return (
     <CyclesContext.Provider
       value={{
+        cycles,
         activeCycleId,
         activeCycle,
         amountSecondsPassed,
