@@ -1,13 +1,5 @@
 import { createContext, useState, ReactNode, useReducer } from 'react'
-
-interface Cycle {
-  id: string // representar unicamente um ciclo
-  task: string
-  minutesAmount: number
-  startDate: Date // salvar qual q foi a data q o timer começou/ficou ativo
-  interruptedDate?: Date
-  finishedDate?: Date
-}
+import { ActionTypes, Cycle, cyclesReducer } from '../Reducers/cycles'
 
 interface CreateCycleData {
   task: string
@@ -32,11 +24,6 @@ interface CyclesContextProviderProps {
   children: ReactNode
 }
 
-interface CyclesSate {
-  cycles: Cycle[] //array
-  activeCycleId: string | null
-}
-
 export function CyclesContextProvider({
   children,
 }: CyclesContextProviderProps) {
@@ -44,44 +31,7 @@ export function CyclesContextProvider({
   //o reducer é o ponto que vai receber qualquer tipo de alteração no estado
   //o type é oque destigue cada ação
   const [cyclesState, dispatch] = useReducer(
-    (state: CyclesSate, action: any) => {
-      //metodo para disparar a ação
-      switch (action.type) {
-        case 'ADD_NEW_CYCLE':
-          return {
-            ...state, // copiar os dados que ja tem e não mudar o valor do activeCycleId
-            cycles: [...state.cycles, action.payload.newCycle], // atualiza
-            activeCycleId: action.payload.newCycle.id,
-          }
-        case 'INTERRUPT_CURRENT_CYCLE':
-          return {
-            ...state,
-            cycles: state.cycles.map((cycle) => {
-              if (cycle.id === state.activeCycleId) {
-                return { ...cycle, interruptedDate: new Date() }
-              } else {
-                return cycle
-              }
-            }),
-            activeCycleId: null,
-          }
-        case 'MARK_CURRENT_CYCLE_AS_FINISHED':
-          return {
-            ...state,
-            cycles: state.cycles.map((cycle) => {
-              if (cycle.id === state.activeCycleId) {
-                return { ...cycle, finishedDate: new Date() }
-              } else {
-                return cycle
-              }
-            }),
-            activeCycleId: null,
-          }
-        default:
-          return state
-      }
-
-    },
+    cyclesReducer,
     {
       //tem q passar como objeto
       cycles: [],
@@ -106,7 +56,7 @@ export function CyclesContextProvider({
       startDate: new Date(), // data atual base da data pra saber quanto tempo passou
     }
     dispatch({
-      type: 'ADD_NEW_CYCLE',
+      type: ActionTypes.ADD_NEW_CYCLE,
       payload: {
         newCycle,
       },
@@ -118,7 +68,7 @@ export function CyclesContextProvider({
 
   function interruptCurrentCycle() {
     dispatch({
-      type: 'INTERRUPT_CURRENT_CYCLE',
+      type: ActionTypes.INTERRUPT_CURRENT_CYCLE,
       payload: {
         activeCycleId,
       },
@@ -127,7 +77,7 @@ export function CyclesContextProvider({
 
   function markCurrentCycleFinished() {
     dispatch({
-      type: 'MARK_CURRENT_CYCLE_AS_FINISHED',
+      type: ActionTypes.MARK_CURRENT_AS_FINISHED,
       payload: {
         activeCycleId,
       },
