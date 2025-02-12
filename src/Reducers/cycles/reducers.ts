@@ -1,3 +1,5 @@
+import { ActionTypes } from "./actions"
+import { produce } from 'immer'
 
 export interface Cycle {
   id: string // representar unicamente um ciclo
@@ -8,52 +10,82 @@ export interface Cycle {
   finishedDate?: Date
 }
 
-interface CyclesSate {
+export interface CyclesState {
   cycles: Cycle[] //array
   activeCycleId: string | null
 }
 
-export enum ActionTypes {
-  ADD_NEW_CYCLE = 'ADD_NEW_CYCLE',
-  INTERRUPT_CURRENT_CYCLE = 'INTERRUPT_CURRENT_CYCLE',
-  MARK_CURRENT_AS_FINISHED = 'MARK_CURRENT_CYCLE_AS_FINISHED'
-}
 
-export function cyclesReducer(state: CyclesSate, action: any) {
+
+export function cyclesReducer(state: CyclesState, action: any) {
   //metodo para disparar a ação
   switch (action.type) {
     case ActionTypes.ADD_NEW_CYCLE:
-      return {
-        ...state, // copiar os dados que ja tem e não mudar o valor do activeCycleId
-        cycles: [...state.cycles, action.payload.newCycle], // atualiza
-        activeCycleId: action.payload.newCycle.id,
-      }
-    case ActionTypes.INTERRUPT_CURRENT_CYCLE:
-      return {
-        ...state,
-        cycles: state.cycles.map((cycle) => {
-          if (cycle.id === state.activeCycleId) {
-            return { ...cycle, interruptedDate: new Date() }
-          } else {
-            return cycle
-          }
-        }),
-        activeCycleId: null,
-      }
-    case ActionTypes.MARK_CURRENT_AS_FINISHED:
-      return {
-        ...state,
-        cycles: state.cycles.map((cycle) => {
-          if (cycle.id === state.activeCycleId) {
-            return { ...cycle, finishedDate: new Date() }
-          } else {
-            return cycle
-          }
-        }),
-        activeCycleId: null,
-      }
-    default:
-      return state
-  }
+      // return {
+      //   ...state, // copiar os dados que ja tem e não mudar o valor do activeCycleId
+      //   cycles: [...state.cycles, action.payload.newCycle], // atualiza
+      //   activeCycleId: action.payload.newCycle.id,
+      // }
+      return produce(state, (draft) => {
+        draft.cycles.push(action.payload.newCycle);
+        draft.activeCycleId = action.payload.newCycle.id
+      })
 
+    case ActionTypes.INTERRUPT_CURRENT_CYCLE: {
+      // return {
+      //   ...state,
+      //   cycles: state.cycles.map((cycle) => {
+      //     if (cycle.id === state.activeCycleId) {
+      //       return { ...cycle, interruptedDate: new Date() }
+      //     } else {
+      //       return cycle
+      //     }
+      //   }),
+      //   activeCycleId: null,
+      // }
+
+      const currentCycleIndex = state.cycles.findIndex(cycle => {
+        return cycle.id === state.activeCycleId
+      })
+
+      if (currentCycleIndex < 0) { //quando ele n encontra
+        return state
+      }
+
+      return produce(state, (draft) => {
+        draft.activeCycleId = null
+        draft.cycles[currentCycleIndex].interruptedDate = new Date()
+      })
+    }
+
+    case ActionTypes.MARK_CURRENT_CYCLE_AS_FINISHED: {
+      //     return {
+      //       ...state,
+      //       cycles: state.cycles.map((cycle) => {
+      //         if (cycle.id === state.activeCycleId) {
+      //           return { ...cycle, finishedDate: new Date() }
+      //         } else {
+      //           return cycle
+      //         }
+      //       }),
+      //       activeCycleId: null,
+      //     }
+      //   default:
+      //     return state
+      // }
+
+      const currentCycleIndex = state.cycles.findIndex(cycle => {
+        return cycle.id === state.activeCycleId
+      })
+
+      if (currentCycleIndex < 0) { //quando ele n encontra
+        return state
+      }
+
+      return produce(state, (draft) => {
+        draft.activeCycleId = null
+        draft.cycles[currentCycleIndex].finishedDate = new Date()
+      })
+    }
+  }
 }

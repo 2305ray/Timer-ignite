@@ -1,106 +1,94 @@
-import { createContext, useState, ReactNode, useReducer } from 'react'
-import { ActionTypes, Cycle, cyclesReducer } from '../Reducers/cycles/reducers'
+import { createContext, useState, ReactNode, useReducer, useEffect } from 'react'
+import { Cycle, cyclesReducer} from '../Reducers/cycles/reducers'
+import {
+  addNewCycleAction,
+  interruptCurrentCycleAction,
+  markCurrenteCycleAsFinishedAction,
+} from '../Reducers/cycles/actions'
 
+// Define os dados para criar um novo ciclo (tarefa e tempo)
 interface CreateCycleData {
   task: string
   minutesAmount: number
 }
 
+// Define o tipo do contexto para fornecer os valores do estado e ações para o restante da aplicação
 interface CyclesContextType {
-  cycles: Cycle[]
-  activeCycle: Cycle | undefined
-  activeCycleId: string | null
-  amountSecondsPassed: number
-  createNewCycle: (data: CreateCycleData) => void
-  interruptCurrentCycle: () => void
-  markCurrentCycleFinished: () => void // é uma função que n retorna valor nenhum
-  setSecondsPassed: (seconds: number) => void
+  cycles: Cycle[] // Lista de ciclos
+  activeCycle: Cycle | undefined // Ciclo ativo
+  activeCycleId: string | null // ID do ciclo ativo
+  amountSecondsPassed: number // Tempo em segundos passado desde o início do ciclo ativo
+  createNewCycle: (data: CreateCycleData) => void // Função para criar um novo ciclo
+  interruptCurrentCycle: () => void // Função para interromper o ciclo ativo
+  markCurrentCycleFinished: () => void // Função para marcar o ciclo ativo como finalizado
+  setSecondsPassed: (seconds: number) => void // Função para atualizar os segundos passados
 }
 
 export const CyclesContext = createContext({} as CyclesContextType)
-// AO COLOCAR O AS COMO A INTERFACE LÁ, ELE VAI INSTRUIR AO QUE COLOCAR QUANDO CHAMAR ELE LÁ EMBAIXO
 
 interface CyclesContextProviderProps {
-  children: ReactNode
-}
+  children: ReactNode // Componentes filhos do contexto
+} 
 
 export function CyclesContextProvider({
   children,
 }: CyclesContextProviderProps) {
-  // estado para cada um dos input, ele inicia com uma lista vazia
-  //o reducer é o ponto que vai receber qualquer tipo de alteração no estado
-  //o type é oque destigue cada ação
-  const [cyclesState, dispatch] = useReducer(
-    cyclesReducer,
-    {
-      //tem q passar como objeto
-      cycles: [],
-      activeCycleId: null,
-    },
+  // Usando useReducer com tipagem explícita para o reducer e estado inicial
+  const [CyclesState, dispatch] = useReducer(
+    cyclesReducer, // O reducer que manipula o estado
+    { cycles: [], activeCycleId: null } // Estado inicial
   )
-
-  const { cycles, activeCycleId } = cyclesState
-
-  // amarzena o segundos que se passarm desde q o ciclo foi iniciado
+ // Estado para armazenar os segundos passados
   const [amountSecondsPassed, setAmountSecondsPassed] = useState(0)
 
-  // com base no id do ciclo ativo, percorrer todos ciclos e retornar o ciclo q tenha o mesmo id
-  const activeCycle = cycles.find((cycle) => cycle.id === activeCycleId)
+  useEffect(() => {
+    const stateJson = JSON.stringify(CyclesState)
 
+    localStorage.setItem('', stateJson)
+  }, [CyclesState])
+
+  // Desestruturando o estado para obter ciclos e o ID do ciclo ativo
+  const { cycles, activeCycleId } = CyclesState
+  // Encontrando o ciclo ativo com base no ID
+  const activeCycle = cycles.find((cycle: Cycle) => cycle.id === activeCycleId)
+
+  // Função para criar um novo ciclo
   function createNewCycle(data: CreateCycleData) {
-    const id = String(new Date().getTime()) // pega a data atual e transforma em milisegundos
+    // Gerando um ID único para o ciclo com base no timestamp
+    const id = String(new Date().getTime())
+
+    // Criando o novo ciclo
     const newCycle: Cycle = {
       id,
       task: data.task,
       minutesAmount: data.minutesAmount,
-      startDate: new Date(), // data atual base da data pra saber quanto tempo passou
+      startDate: new Date(),
     }
-    dispatch({
-      type: ActionTypes.ADD_NEW_CYCLE,
-      payload: {
-        newCycle,
-      },
-    })
-    // setCycles((state) => [...state, newCycle])  ele pega o estate atual e adiciona um novo ciclo
 
-    setAmountSecondsPassed(0) // zera os segundos passados
+    // Dispatching a ação para adicionar o novo ciclo ao estado
+    dispatch(addNewCycleAction(newCycle))
+
+    // Resetando o contador de segundos
+    setAmountSecondsPassed(0)
   }
 
+  // Função para interromper o ciclo ativo
   function interruptCurrentCycle() {
-    dispatch({
-      type: ActionTypes.INTERRUPT_CURRENT_CYCLE,
-      payload: {
-        activeCycleId,
-      },
-    })
+    dispatch(interruptCurrentCycleAction()) // Dispatching a ação de interromper
   }
 
+  // Função para marcar o ciclo ativo como finalizado
   function markCurrentCycleFinished() {
-    dispatch({
-      type: ActionTypes.MARK_CURRENT_AS_FINISHED,
-      payload: {
-        activeCycleId,
-      },
-    })
-
-    // setCycles((state) =>
-    //   state.map((cycle) => {
-    //     if (cycle.id === activeCycle?.id) {
-    //       return { ...cycle, finishedDate: new Date() }
-    //     } else {
-    //       return cycle
-    //     }
-    //   }),
-    // )
-    //setActiveCycleId(null)  Adicionado para garantir que o ciclo ativo seja desmarcado quando concluído
+    dispatch(markCurrenteCycleAsFinishedAction()) // Dispatching a ação de finalizar
   }
 
+  // Função para atualizar os segundos passados
   function setSecondsPassed(seconds: number) {
     setAmountSecondsPassed(seconds)
   }
 
-  // visualmente n vai ter nada
   return (
+    // Provedor do contexto para disponibilizar os valores e funções para os componentes filhos
     <CyclesContext.Provider
       value={{
         cycles,
@@ -113,7 +101,7 @@ export function CyclesContextProvider({
         setSecondsPassed,
       }}
     >
-      {children}
+      {children} {/* Renderiza os filhos passados para o contexto */}
     </CyclesContext.Provider>
   )
 }
