@@ -25,7 +25,7 @@ export function Countdown() {
         // difrença em segundos da data atual  (sempre adiante como primeiro parametro) e a data de inicio do ciclo ativo
         const secondDifference = differenceInSeconds(
           new Date(),
-          activeCycle.startDate,
+          new Date(activeCycle.startDate),
         )
 
         if (secondDifference >= totalSeconds) {
@@ -42,7 +42,13 @@ export function Countdown() {
       // serev para quando executar dnv e quer fazer algo para limpar o anterior para q n aconteça mais
       clearInterval(interval)
     }
-  }, [activeCycle, totalSeconds, activeCycleId, markCurrentCycleFinished, setSecondsPassed]) // sempre q utiliza uma variavel de fora do useEffect, tem que colocar ela como dependencia
+  }, [
+    activeCycle,
+    totalSeconds,
+    activeCycleId,
+    markCurrentCycleFinished,
+    setSecondsPassed,
+  ]) // sempre q utiliza uma variavel de fora do useEffect, tem que colocar ela como dependencia
 
   const currentSeconds = activeCycle ? totalSeconds - amountSecondsPassed : 0
 

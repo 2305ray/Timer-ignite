@@ -15,35 +15,16 @@ export interface CyclesState {
   activeCycleId: string | null
 }
 
-
-
-export function cyclesReducer(state: CyclesState, action: any) {
+export function cyclesReducer(state: CyclesState, action: any): CyclesState {
   //metodo para disparar a ação
   switch (action.type) {
     case ActionTypes.ADD_NEW_CYCLE:
-      // return {
-      //   ...state, // copiar os dados que ja tem e não mudar o valor do activeCycleId
-      //   cycles: [...state.cycles, action.payload.newCycle], // atualiza
-      //   activeCycleId: action.payload.newCycle.id,
-      // }
       return produce(state, (draft) => {
         draft.cycles.push(action.payload.newCycle);
         draft.activeCycleId = action.payload.newCycle.id
       })
 
     case ActionTypes.INTERRUPT_CURRENT_CYCLE: {
-      // return {
-      //   ...state,
-      //   cycles: state.cycles.map((cycle) => {
-      //     if (cycle.id === state.activeCycleId) {
-      //       return { ...cycle, interruptedDate: new Date() }
-      //     } else {
-      //       return cycle
-      //     }
-      //   }),
-      //   activeCycleId: null,
-      // }
-
       const currentCycleIndex = state.cycles.findIndex(cycle => {
         return cycle.id === state.activeCycleId
       })
@@ -59,21 +40,6 @@ export function cyclesReducer(state: CyclesState, action: any) {
     }
 
     case ActionTypes.MARK_CURRENT_CYCLE_AS_FINISHED: {
-      //     return {
-      //       ...state,
-      //       cycles: state.cycles.map((cycle) => {
-      //         if (cycle.id === state.activeCycleId) {
-      //           return { ...cycle, finishedDate: new Date() }
-      //         } else {
-      //           return cycle
-      //         }
-      //       }),
-      //       activeCycleId: null,
-      //     }
-      //   default:
-      //     return state
-      // }
-
       const currentCycleIndex = state.cycles.findIndex(cycle => {
         return cycle.id === state.activeCycleId
       })
@@ -87,5 +53,8 @@ export function cyclesReducer(state: CyclesState, action: any) {
         draft.cycles[currentCycleIndex].finishedDate = new Date()
       })
     }
+
+    default:
+      return state
   }
 }

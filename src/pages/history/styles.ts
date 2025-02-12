@@ -70,22 +70,36 @@ const STATUS_COLORS = {
     green: 'green-500',
     red: 'red-500',
 }as const // diz q o texto vai ser sempre esses tres valores
-interface StatusProps { 
-    statusColor: keyof typeof STATUS_COLORS
-}
 
-export const Status = styled.span<StatusProps>`
-display:flex;
-align-items: center;
-gap: 0.5rem;
+//React does not recognize the `statusColor` prop on a DOM element.
+// React estava tentando passar uma prop statusColor para um span, o que não é válido. Isso gerava um problema porque, em vez de ser
+//  usada apenas para estilização, a prop estava sendo transferida para o DOM.
 
-&::before {
+
+//2. Solução com Transient Props
+// O styled-components tem um recurso chamado transient props (ou propriedades transitórias), que resolve esse tipo de problema.
+// Uma transient prop é uma prop que você deseja passar apenas para o 
+// styled component para estilização, mas não deve ser passada para o DOM. Ou seja, ela é usada apenas 
+// no contexto do estilo, e não no HTML renderizado.
+
+// 3. Como usar Transient Props
+// Para definir uma prop como transitória, você prefixa o nome da prop com um cifrão ($).
+//  Essa convenção de nomeação é como o styled-components sabe que 
+// a prop deve ser tratada de forma especial e não ser transmitida para o DOM.
+// Modificação no código:
+// Você alterou a prop statusColor para $statusColor, e isso indicou ao styled-components que essa prop é transitória.
+
+export const Status = styled.span<{ $statusColor: keyof typeof STATUS_COLORS }>`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &::before {
     content: '';
     width: 0.5rem;
     height: 0.5rem;
     border-radius: 9999px;
-    background-color: ${(props) => props.theme[STATUS_COLORS[props.statusColor]]};
-
-}
-
+    background-color: ${(props) => props.theme[STATUS_COLORS[props.$statusColor]]};
+  }
 `;
+
