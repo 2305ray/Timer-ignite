@@ -73,7 +73,7 @@ O projeto foi desenvolvido utilizando as seguintes tecnologias:
    ```
 2. Acesse a pasta do projeto:
    ```bash
-   cd devstage
+   cd Timer-ignite
    ```
 3. Instale as dependências:
    ```bash
