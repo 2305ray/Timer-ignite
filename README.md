@@ -59,8 +59,8 @@ O projeto foi desenvolvido utilizando as seguintes tecnologias:
 
 ### 💻 **Versão Desktop**
 <div align="center">
-  <img alt="Timer Ignite home" src="https://github.com/2305ray/timer-ignite-3/blob/main/src/assets/desktop-timer-ignite.png" width="48%">
-  <img alt="timer Ignite history" src="https://github.com/2305ray/timer-ignite-3/blob/main/src/assets/desktop-timer-ignite-history.png" width="48%">
+  <img alt="Timer Ignite home" src="https://github.com/2305ray/timer-ignite-3/blob/main/src/assets/desktop-timer-ignite.png" width="75%">
+  <img alt="timer Ignite history" src="https://github.com/2305ray/timer-ignite-3/blob/main/src/assets/desktop-timer-ignite-history.png" width="75%">
 </div>
 
 --- 
