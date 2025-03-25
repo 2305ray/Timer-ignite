@@ -28,7 +28,7 @@ O objetivo é permitir que os usuários gerenciem seu tempo de forma eficiente, 
 
    ---
   
-## 🖥️ Tecnologias
+ ## 🚀 Tecnologias
 
 O projeto foi desenvolvido utilizando as seguintes tecnologias:
 
